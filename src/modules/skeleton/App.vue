@@ -1,9 +1,19 @@
 <template>
-  <div >
+    <!--<section class="consult-main-inner">-->
+        <!--&lt;!&ndash;<transition name="fade">&ndash;&gt;-->
+            <!--&lt;!&ndash;<toast :content="errorMsg" v-if="errorShow"></toast>&ndash;&gt;-->
+        <!--&lt;!&ndash;</transition>&ndash;&gt;-->
+        <!--&lt;!&ndash;<loading v-show="finish"></loading>&ndash;&gt;-->
+      <!--<section>-->
+        <!--<div @click="testOneFn()">testOne</div>-->
+      <!--</section>-->
+    <!--</section>-->
+  <div class="app">
     <keep-alive>
       <router-view v-if="$route.meta.keepAlive" style="min-height:100%"></router-view>
     </keep-alive>
     <router-view v-if="!$route.meta.keepAlive" style="min-height:100%"></router-view>
+    <!--<Loading v-if="$store.state.loading"></Loading>-->
   </div>
 </template>
 <script type="text/ecmascript-6">
@@ -48,7 +58,11 @@
             console.log("testOne")
           }
         },
-        components: {},
+        components: {
+            // loading,
+            // toast,
+            // confirm
+        },
     }
 
 

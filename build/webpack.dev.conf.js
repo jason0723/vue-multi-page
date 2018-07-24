@@ -9,9 +9,13 @@ const CopyWebpackPlugin = require('copy-webpack-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const FriendlyErrorsPlugin = require('friendly-errors-webpack-plugin')
 const portfinder = require('portfinder')
+const glob = require('glob')
 
 const HOST = process.env.HOST
 const PORT = process.env.PORT && Number(process.env.PORT)
+function resolve(dir){
+  return path.join(__dirname, '..', dir)
+}
 
 const devWebpackConfig = merge(baseWebpackConfig, {
   module: {
@@ -52,11 +56,11 @@ const devWebpackConfig = merge(baseWebpackConfig, {
     new webpack.NamedModulesPlugin(), // HMR shows correct file names in console on update.
     new webpack.NoEmitOnErrorsPlugin(),
     // https://github.com/ampedandwired/html-webpack-plugin
-    new HtmlWebpackPlugin({
-      filename: 'index.html',
-      template: 'index.html',
-      inject: true
-    }),
+    // new HtmlWebpackPlugin({
+    //   filename: 'index.html',
+    //   template: 'index.html',
+    //   inject: true
+    // }),
     // copy custom static assets
     new CopyWebpackPlugin([
       {
@@ -67,6 +71,42 @@ const devWebpackConfig = merge(baseWebpackConfig, {
     ])
   ]
 })
+
+let pages = ((globalPath)=>{
+  let htmlFiles = {},
+    pageName;
+
+  glob.sync(globalPath).forEach((pagePath)=>{
+    let basename = path.basename(pagePath, path.extname(pagePath));
+    pageName = basename;
+    htmlFiles[pageName] = {};
+    htmlFiles[pageName]['chunk'] = basename;
+    htmlFiles[pageName]['path'] = pagePath;
+
+  });
+  return htmlFiles;
+})(resolve('src')+'/modules/**/*.html');
+
+for (let entryName in pages) {
+
+  let conf = {
+    // 生成出来的html文件名
+    filename: entryName + '.html',
+    // 每个html的模版，这里多个页面使用同一个模版
+    template: pages[entryName]['path'],
+    // 自动将引用插入html
+    inject: true,
+    hash: false,
+    // 每个html引用的js模块，也可以在这里加上vendor等公用模块
+    chunks: ['vendor','manifest',pages[entryName]['chunk']],
+    minify: { //压缩HTML文件
+      removeComments: true, //移除HTML中的注释
+      collapseWhitespace: false //删除空白符与换行符
+    }
+  };
+  /*入口文件对应html文件（配置多个，一个页面对应一个入口，通过chunks对应）*/
+  devWebpackConfig.plugins.push(new HtmlWebpackPlugin(conf));
+}
 
 module.exports = new Promise((resolve, reject) => {
   portfinder.basePort = process.env.PORT || config.dev.port
