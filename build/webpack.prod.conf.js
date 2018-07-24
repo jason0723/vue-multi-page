@@ -10,6 +10,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin')
 const ExtractTextPlugin = require('extract-text-webpack-plugin')
 const OptimizeCSSPlugin = require('optimize-css-assets-webpack-plugin')
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
+const glob = require('glob');                                       //Multi-page packaging dependencies
 
 const env = process.env.NODE_ENV === 'testing'
   ? require('../config/test.env')
@@ -62,22 +63,22 @@ const webpackConfig = merge(baseWebpackConfig, {
     // generate dist index.html with correct asset hash for caching.
     // you can customize output by editing /index.html
     // see https://github.com/ampedandwired/html-webpack-plugin
-    new HtmlWebpackPlugin({
-      filename: process.env.NODE_ENV === 'testing'
-        ? 'index.html'
-        : config.build.index,
-      template: 'index.html',
-      inject: true,
-      minify: {
-        removeComments: true,
-        collapseWhitespace: true,
-        removeAttributeQuotes: true
-        // more options:
-        // https://github.com/kangax/html-minifier#options-quick-reference
-      },
-      // necessary to consistently work with multiple chunks via CommonsChunkPlugin
-      chunksSortMode: 'dependency'
-    }),
+    // new HtmlWebpackPlugin({
+    //   filename: process.env.NODE_ENV === 'testing'
+    //     ? 'index.html'
+    //     : config.build.index,
+    //   template: 'index.html',
+    //   inject: true,
+    //   minify: {
+    //     removeComments: true,
+    //     collapseWhitespace: true,
+    //     removeAttributeQuotes: true
+    //     // more options:
+    //     // https://github.com/kangax/html-minifier#options-quick-reference
+    //   },
+    //   // necessary to consistently work with multiple chunks via CommonsChunkPlugin
+    //   chunksSortMode: 'dependency'
+    // }),
     // keep module.id stable when vendor modules does not change
     new webpack.HashedModuleIdsPlugin(),
     // enable scope hoisting
@@ -144,6 +145,87 @@ if (config.build.productionGzip) {
 if (config.build.bundleAnalyzerReport) {
   const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin
   webpackConfig.plugins.push(new BundleAnalyzerPlugin())
+}
+//Multi-page packaging 
+let pages = ((globalPath) => {
+  let htmlFiles = {},
+    pageName;
+
+  glob.sync(globalPath).forEach((pagePath) => {
+    let basename = path.basename(pagePath, path.extname(pagePath));
+    pageName = basename;
+    htmlFiles[pageName] = {};
+    htmlFiles[pageName]['chunk'] = basename;
+    htmlFiles[pageName]['path'] = pagePath;
+
+  });
+  return htmlFiles;
+})(path.resolve('src') + '/modules/**/*.html');
+
+for (let entryName in pages) {
+  if (!entryName.includes("jTemplate")) {
+    let conf = {
+      // 生成出来的html文件名
+      //Fixed by qiangkailiang on 20171204
+      //若输出为首页，则输出至根目录下index.html
+      filename: (entryName === "index" ? "../" + entryName + '.html' : entryName + '.html'),
+      // 每个html的模版，这里多个页面使用同一个模版
+      template: pages[entryName]['path'],
+      // 自动将引用插入html
+      inject: true,
+      minify: {
+        removeComments: true,
+        collapseWhitespace: true,
+        removeAttributeQuotes: true
+        // more options:
+        // https://github.com/kangax/html-minifier#options-quick-reference
+      },
+      script:'<script src="https://cdn.bootcss.com/vue/2.5.15/vue.min.js"></script>',
+      chunks: [entryName, 'manifest', 'vendor'],
+      /*
+      * Fixed By Jukun on 20170806
+      * 多页架构若不添加chunks将引入全部项目文件
+      * entryName为页面唯一路径标识
+      * 若有不匹配的资源文件将不被引入
+      * manifest与vendor为webpackJsonP公用类必须引入
+      * */
+      // necessary to consistently work with multiple chunks via CommonsChunkPlugin
+      chunksSortMode: 'dependency'
+    };
+    /*入口文件对应html文件（配置多个，一个页面对应一个入口，通过chunks对应）*/
+    webpackConfig.plugins.push(new HtmlWebpackPlugin(conf));
+  } else {
+    let conf = {
+      // 生成出来的html文件名
+      //Fixed by Jukun on 20171204
+      //若输出为首页，则输出至根目录下index.html
+      filename: (entryName === "index" ? "../" + entryName + '.html' : entryName + '.html'),
+      // 每个html的模版，这里多个页面使用同一个模版
+      template: pages[entryName]['path'],
+      // 自动将引用插入html
+      inject: false,
+      minify: {
+        removeComments: true,
+        collapseWhitespace: true,
+        removeAttributeQuotes: true
+        // more options:
+        // https://github.com/kangax/html-minifier#options-quick-reference
+      },
+      script:'<script src="https://cdn.bootcss.com/vue/2.5.15/vue.min.js"></script>',
+      chunks: [entryName, 'manifest', 'vendor'],
+      /*
+      * Fixed By Jukun on 20170806
+      * 多页架构若不添加chunks将引入全部项目文件
+      * entryName为页面唯一路径标识
+      * 若有不匹配的资源文件将不被引入
+      * manifest与vendor为webpackJsonP公用类必须引入
+      * */
+      // necessary to consistently work with multiple chunks via CommonsChunkPlugin
+      chunksSortMode: 'dependency'
+    };
+    /*入口文件对应html文件（配置多个，一个页面对应一个入口，通过chunks对应）*/
+    webpackConfig.plugins.push(new HtmlWebpackPlugin(conf));
+  }
 }
 
 module.exports = webpackConfig
