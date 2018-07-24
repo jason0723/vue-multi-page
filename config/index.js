@@ -3,6 +3,17 @@
 // see http://vuejs-templates.github.io/webpack for documentation.
 
 const path = require('path')
+const interfaces = require('os').networkInterfaces(); // 在开发环境中获取局域网中的本机iP地址
+let IPAdress = '';
+for (let devName in interfaces) {
+  let iface = interfaces[devName];
+  for (let i = 0; i < iface.length; i++) {
+    let alias = iface[i];
+    if (alias.family === 'IPv4' && alias.address !== '127.0.0.1' && !alias.internal) {
+      IPAdress = alias.address;
+    }
+  }
+}
 
 module.exports = {
   dev: {
@@ -13,14 +24,14 @@ module.exports = {
     proxyTable: {},
 
     // Various Dev Server settings
-    host: 'localhost', // can be overwritten by process.env.HOST
+    host: !!IPAdress?IPAdress:'localhost', // can be overwritten by process.env.HOST
     port: 8080, // can be overwritten by process.env.PORT, if port is in use, a free one will be determined
     autoOpenBrowser: false,
     errorOverlay: true,
     notifyOnErrors: true,
     poll: false, // https://webpack.js.org/configuration/dev-server/#devserver-watchoptions-
 
-    
+
     /**
      * Source Maps
      */
