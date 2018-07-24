@@ -4,6 +4,25 @@ const utils = require('./utils')
 const config = require('../config')
 const vueLoaderConfig = require('./vue-loader.conf')
 
+const fs = require('fs');
+let buildEntries = {};
+let devEntries = {};
+const modules = fs.readdirSync(path.join(resolve('src'), 'modules'));
+
+const selfConfig = require("./selfConfig");
+
+
+for (let moduleName of modules) {
+  if (selfConfig.length === 0) {
+    devEntries[moduleName] = path.join(resolve('src'), 'modules', moduleName, 'main.js');
+  } else {
+    if (selfConfig.includes(moduleName)) {
+      devEntries[moduleName] = path.join(resolve('src'), 'modules', moduleName, 'main.js');
+    }
+  }
+  buildEntries[moduleName] = path.join(resolve('src'), 'modules', moduleName, 'main.js');
+}
+
 function resolve (dir) {
   return path.join(__dirname, '..', dir)
 }
@@ -12,9 +31,7 @@ function resolve (dir) {
 
 module.exports = {
   context: path.resolve(__dirname, '../'),
-  entry: {
-    app: './src/main.js'
-  },
+  entry: process.env.NODE_ENV === 'production' ? buildEntries : devEntries,
   output: {
     path: config.build.assetsRoot,
     filename: '[name].js',
