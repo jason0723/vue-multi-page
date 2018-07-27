@@ -1,15 +1,31 @@
 <template>
     <section>
-      hello world
+      <div class="ensureBtn" @click="testOneFn">hello world</div>
     </section>
 </template>
 
 <script>
-    export default {
-        name: "testTwo"
+import api from "common/js/util/util";
+export default {
+  name: "testOne",
+  data() {
+    return {
+      type: 1
+    };
+  },
+  methods: {
+    testOneFn() {
+      
     }
+  }
+};
 </script>
 
-<style scoped>
 
+<style lang="scss" >
+.ensureBtn{
+  font-size: 56px;
+  color: #000000;
+
+}
 </style>

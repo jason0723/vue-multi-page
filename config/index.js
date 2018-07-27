@@ -21,7 +21,13 @@ module.exports = {
     // Paths
     assetsSubDirectory: 'static',
     assetsPublicPath: '/',
-    proxyTable: {},
+    proxyTable: {
+      // '/mcall': {
+      //   target: '',         //http://www.baidu.com
+      //   changeOrigin: true,
+      //   secure: false
+      // }
+    },
 
     // Various Dev Server settings
     host: !!IPAdress?IPAdress:'localhost', // can be overwritten by process.env.HOST

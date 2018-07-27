@@ -1,6 +1,6 @@
 <template>
     <section>
-      <div @click="testOneFn">你好</div>
+      <div class="ensureBtn" @click="testOneFn">你好 <span>sdf</span></div>
     </section>
 </template>
 
@@ -25,6 +25,4 @@
     }
 </script>
 
-<style scoped>
 
-</style>

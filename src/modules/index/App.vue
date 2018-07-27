@@ -53,7 +53,6 @@
 
 
 </script>
-<style lang="scss" rel="stylesheet/scss">
-    /*@import "../../../../../scss/library/_common-modules";*/
-
+<style lang="scss">
+   
 </style>

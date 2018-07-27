@@ -8,23 +8,23 @@
  */
 import TestOne from "../components/testOne";
 import TestTwo from "../components/testTwo";
+import HelloWorld from "components/HelloWorld";
 
 export default [{
-  path:"/",
-  redirect:"/home"
-},{
-  path:"/testTwo",
-  name:"testTwo",
-  component:TestTwo,
-  meta:{
-    keepAlive:true
+  path: "/",
+  redirect: "/home"
+}, {
+  path: "/testTwo",
+  name: "testTwo",
+  component: TestTwo,
+  meta: {
+    keepAlive: true
   }
-},{
+}, {
   path: "/home",
   name: "home",
   component: TestOne,
   meta: {
     keepAlive: true
   },
-},
-]
+}, ]
